@@ -23,7 +23,9 @@ A aplicação permite carregar uma imagem, aplicar diferentes técnicas de proce
 
 ![gif1](README_images/gif1.gif)
 
+
 ![gif2](README_images/gif2.gif)
+
 
 ![gif3](README_images/gif3.gif)
 
