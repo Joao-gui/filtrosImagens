@@ -21,6 +21,12 @@ A aplicação permite carregar uma imagem, aplicar diferentes técnicas de proce
   - Filtro High Boost
 - Comparação entre imagem original e imagem processada
 
+![gif1](README_images/gif1.gif)
+
+![gif2](README_images/gif2.gif)
+
+![gif3](README_images/gif3.gif)
+
 ---
 
 ## 🛠️ Tecnologias utilizadas
@@ -37,6 +43,7 @@ A aplicação permite carregar uma imagem, aplicar diferentes técnicas de proce
 ```text
 filtrosImagens/
 │
+├── images/					# Pasta com imagens
 ├── main.py                 # Inicialização da aplicação
 ├── streamlit_app.py        # Interface gráfica
 ├── image_processing.py     # Implementação dos filtros
