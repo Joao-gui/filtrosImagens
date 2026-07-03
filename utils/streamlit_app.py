@@ -108,7 +108,8 @@ def run():
         [
             "Original",
             "Negativo",
-            "Transformação Logarítmica"
+            "Transformação Logarítmica",
+            "Transformação Gama"
         ]
     )
 
@@ -119,6 +120,10 @@ def run():
 
     elif aprimoramento == "Transformação Logarítmica":
         resultado = log_transform(image)
+
+    elif aprimoramento == "Transformação Gama":
+        g = st.sidebar.slider("Gama", 0.0, 2.0, 1.0, step=0.1)
+        resultado = gamma_correction(image, g)
 
     # ===========================
     # Informações da imagem
