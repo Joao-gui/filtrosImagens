@@ -79,3 +79,57 @@ def gamma_correction(image, gamma):
 
     # Retorna a imagem após a aplicação da correção gama.
     return gamma_image
+
+# Histograma Cinza
+def gray_histogram(image):
+    '''
+    Plota o histograma de instensidade em escala de cinza de uma imagem
+
+    Args:
+        image (numpy.ndarray): A imagem em escala de cinza para a qual o histograma será gerado. 
+    '''
+    # Define o número de bins (intervalos) para o histograma. Para imagens em escala de cinza, há 256 níveis de intensidade.
+    num_bins = 256
+
+    # Calcula o histograma da imagem usando a função cv2.calcHist do OpenCV
+    # [image]: A imagem de entrada.
+    # [0]: Canal de cor para imagens em escala de cinza é 0.
+    # None: Máscara (não é usada aqui, então é None).
+    # [num_bins]: Número de bins para o histograma.
+    # [0, num_bins]: Intervalo dos níveis de intensidade (0, a 256)
+    hist = cv2.calcHist([image], [0], None, [num_bins], [0, num_bins])
+
+    # Cria uma nova figura com tamanho especificado.
+    fig = plt.figure(figsize=(10,8))
+
+    # Adiciona um subplot 3D à figura
+    ax = fig.add_subplot(projection='3d')
+
+    # Cria um array de índices para os bins do histograma.
+    xs = np.arrange(0, num_bins, 1)
+
+    # Plota um gráfico de barras 3D do histograma.
+    # xs: Posições ao longo do eixo x (níveis de intensidade).
+    # hist.flatten(): Quantidade de picels para cada nível de intensidade (plano z).
+    # zs=0: Posição ao longo do eixo z (aqui fixada em 0).
+    # zdir='y': Direção do eixo z (aqui está configurado para o eixo y).
+    # color='black': Cor das barras.
+    # ec='black': Cor das bordas das barras.
+    # alpha=0.8: Transparência das barras.
+    ax.bar(xs, hist.flatten(), zs=0, zdir='y', color='black', ec='black', alpha=0.8)
+
+    # Define o rótulo do eixo x.
+    ax.set_xlabel('Níveis de intensidade')
+
+    # Define as marcações e rótulos do eixo y.
+    ax.set_yticks([0])
+    ax.set_yticklabels(['Gray'])
+
+    # Define o rótulo do eixo z e adiciona um espaçamento ao rótulo.
+    ax.set_zlabel('Quantidade de pixels', labelpad=3)
+
+    # Ajusta o espaçamento da subfigura manualmente para garantir que os rótulos não sejam cortados.
+    fig.subplots_adjust(left=0, right=1, top=0.8, bottom=0.2)
+
+    # Exibe o histograma.
+    plt.show()
