@@ -2,7 +2,8 @@ import streamlit as st
 import cv2
 import numpy as np
 
-from image_processing import *
+from utils.image_processing import *
+from utils.aprimoramento import *
 
 def run():
     st.set_page_config(
@@ -41,8 +42,10 @@ def run():
         step=10
     )
 
+    # Escala da imagem
     image = resize_image(image, escala, escala)
 
+    # Aplicando ruído na imagem
     st.sidebar.header("Ruído")
 
     usar_ruido = st.sidebar.checkbox(
@@ -52,6 +55,7 @@ def run():
     if usar_ruido:
         image = salt_and_pepper_noise(image)
 
+    # Sidebar dos filtros
     st.sidebar.header("Filtros")
 
     filtro = st.sidebar.selectbox(
@@ -95,39 +99,81 @@ def run():
         a = st.sidebar.slider("A", 1, 10, 1)
         resultado = highboost_filter(image, a)
 
+
+    # Sidebar Aprimoramento da imagem
+    st.sidebar.header("Aprimoramento")
+
+    aprimoramento = st.sidebar.selectbox(
+        "Escolha um Aprimoramento",
+        [
+            "Original",
+            "Negativo",
+            "Transformação Logarítmica"
+        ]
+    )
+
+    resultado = image.copy()
+
+    if aprimoramento == "Negativo":
+        resultado = negative_image(image)
+
+    elif aprimoramento == "Transformação Logarítmica":
+        resultado = log_transform(image)
+
     # ===========================
     # Informações da imagem
     # ===========================
 
-    st.write(f"**Dimensões da imagem:** {image.shape[1]} x {image.shape[0]} pixels")
+    st.write(f"**Dimensões da imagem:** {imagem_original.shape[1]} x {imagem_original.shape[0]} pixels")
 
     # ===========================
     # Exibição das imagens
     # ===========================
 
-    col1, col2, col3 = st.columns(3)
+    if usar_ruido:
 
-    with col1:
-        st.subheader("Imagem Original")
-        st.write(f"{imagem_original.shape[1]} x {imagem_original.shape[0]}")
-        st.image(imagem_original)
+        col1, col2, col3 = st.columns(3)
 
-    with col2:
-        st.subheader("Imagem com Ruído")
+        with col1:
+            st.subheader("Imagem Original")
+            st.write(f"{imagem_original.shape[1]} x {imagem_original.shape[0]}")
+            st.image(imagem_original)
 
-        if usar_ruido:
-            st.write(f"{image.shape[1]} x {image.shape[0]}")
-            st.image(image)
-        else:
-            st.write(f"{image.shape[1]} x {image.shape[0]}")
-            st.image(image)
+        with col2:
+            st.subheader("Imagem com Ruído")
 
-    with col3:
-        st.subheader("Resultado Final")
+            if usar_ruido:
+                st.write(f"{image.shape[1]} x {image.shape[0]}")
+                st.image(image)
+            else:
+                st.write(f"{image.shape[1]} x {image.shape[0]}")
+                st.image(image)
 
-        if len(resultado.shape) == 2:
-            st.write(f"{resultado.shape[1]} x {resultado.shape[0]}")
-        else:
-            st.write(f"{resultado.shape[1]} x {resultado.shape[0]}")
+        with col3:
+            st.subheader("Resultado Final")
 
-        st.image(resultado)
+            if len(resultado.shape) == 2:
+                st.write(f"{resultado.shape[1]} x {resultado.shape[0]}")
+            else:
+                st.write(f"{resultado.shape[1]} x {resultado.shape[0]}")
+
+            st.image(resultado)
+
+    else:
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.subheader("Imagem Original")
+            st.write(f"{imagem_original.shape[1]} x {imagem_original.shape[0]}")
+            st.image(imagem_original)
+
+        with col2:
+            st.subheader("Resultado Final")
+
+            if len(resultado.shape) == 2:
+                st.write(f"{resultado.shape[1]} x {resultado.shape[0]}")
+            else:
+                st.write(f"{resultado.shape[1]} x {resultado.shape[0]}")
+
+            st.image(resultado)
