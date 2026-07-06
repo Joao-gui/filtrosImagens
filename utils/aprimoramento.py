@@ -106,7 +106,7 @@ def gray_histogram(image):
     ax = fig.add_subplot(projection='3d')
 
     # Cria um array de índices para os bins do histograma.
-    xs = np.arrange(0, num_bins, 1)
+    xs = np.arange(0, num_bins, 1)
 
     # Plota um gráfico de barras 3D do histograma.
     # xs: Posições ao longo do eixo x (níveis de intensidade).
@@ -132,4 +132,75 @@ def gray_histogram(image):
     fig.subplots_adjust(left=0, right=1, top=0.8, bottom=0.2)
 
     # Exibe o histograma.
-    plt.show()
+    return fig
+
+# Histograma Colorido
+def color_histogram(image):
+    '''
+    Plota o Histograma de intensidade para cada canal de cor (R, G, B) de uma imagem colorida.
+
+    Args:
+        image (numpy.ndarray): A imagem coloria para a qual o histograma será gerado. Deve estar no formato BGR (como é padrão no OpenCV)
+    '''
+    # Define o número de bins (intervalos) para o histograma. Para imagens coloridas, há 256 níveis de intensiade por canal de cor.
+    num_bins = 256
+
+    # Calcula o hisrograma para cada canal de cor: R(vermelho), G(verde) e B(azul).
+    # cv2.calcHist é usado para calcular o histograma dos canais individuais da imagem.
+    # [0]: Canal vermelho
+    hist_r = cv2.calcHist([image], [0], None, [num_bins], [0, num_bins])
+    # [1]: Canal verde
+    hist_g = cv2.calcHist([image], [1], None, [num_bins], [0, num_bins])
+    # [2]: Canal azul
+    hist_b = cv2.calcHist([image], [2], None, [num_bins], [0, num_bins])
+
+    # Cria uma nova figura com tamanho especificado
+    fig = plt.figure(figsize=(10,8))
+
+    # Adiciona um subplot 3D à figura
+    ax = fig.add_subplot(projection='3d')
+
+    # Cria um array de índices para os bins do histograma
+    xs = np.arange(0, num_bins, 1)
+
+    # Plota o gráfico de barras 3D para cada canal de cor
+    # Canal vermelho
+    ax.bar(xs, hist_r.flatten(), zs=0, zdir='y', color='red', ec='red', alpha=0.8)
+    # Canal verde
+    ax.bar(xs, hist_g.flatten(), zs=10, zdir='y', color='green', ec='green', alpha=0.8)
+    # Canal azul
+    ax.bar(xs, hist_b.flatten(), zs=20, zdir='y', color='blue', ec='blue', alpha=0.8)
+
+    # Define o rótulo do eixo x
+    ax.set_xlabel("Níveis de intensidade")
+
+    # Define as marcações e rótulos do eixo y para cada canal de cor
+    ax.set_yticks([0, 10, 20])
+    ax.set_yticklabels(['Red', 'Green', 'Blue'])
+
+    # Define o rótulo do eixo z e aiciona um espaçamento ao rótulo
+    ax.set_zlabel('Quantidade de pixels', labelpad=3)
+
+    # Ajusta o espaçamento da subfigura manualmente para garantir que os rótulos não sejam cortados
+    fig.subplots_adjust(left=0, right=1, top=0.8, bottom=0.2)
+
+    # Exibe o histograma
+    return fig
+
+# Função para chamar mostrar os histogramas
+def show_histogram(image):
+    '''
+    Exibe o histograma da imagem, diferenciando entre imagens coloridas e em escala de cinza
+
+    Args:
+        image (numpy.ndarray): A imagem para a qual o histograma será exibido. Pode ser uma imagem colorida ou em escala de cinza.
+    '''
+    # Verifica se a imagem é colorida.
+    # Se o número de dimensões da imagem é maior que 2, isso indica que a imagem tem canais de cor (colorida).
+    if len(image.shape) > 2:
+        # Chama a função color_histogram para exibir o histograma dos canais de cor da imagem
+        return color_histogram(image)
+    else:
+        # Cado contrário, a imagem é em escala de cinza.
+        # Chama a função gray_histogram para exibir o histograma da imagem em escala de cinza.
+        return gray_histogram(image)
