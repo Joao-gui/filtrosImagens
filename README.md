@@ -11,7 +11,7 @@ A aplicação permite carregar uma imagem, aplicar diferentes técnicas de proce
 - Upload de imagens (.jpg, .jpeg e .png)
 - Redimensionamento da imagem
 - Conversão para escala de cinza
-- Adição de ruído Sal e Pimenta
+- Adição de ruído "Sal e Pimenta"
 - Aplicação dos seguintes filtros:
   - Filtro da Média
   - Filtro Gaussiano
@@ -19,13 +19,16 @@ A aplicação permite carregar uma imagem, aplicar diferentes técnicas de proce
   - Filtro de Sobel
   - Filtro Laplaciano
   - Filtro High Boost
+- Aplicação de Aprimoramento
+  - Negativo
+  - Transformação Logarítmica
+  - Transformação Gama
+- Histograma
 - Comparação entre imagem original e imagem processada
 
 ![gif1](README_images/gif1.gif)
 
-
 ![gif2](README_images/gif2.gif)
-
 
 ![gif3](README_images/gif3.gif)
 
@@ -46,9 +49,13 @@ A aplicação permite carregar uma imagem, aplicar diferentes técnicas de proce
 filtrosImagens/
 │
 ├── images/					# Pasta com imagens
+├── utils/					# Pasta com os scripts
+│	└── streamlit_app.py    # Interface gráfica
+│	└── image_processing.py # Implementação dos filtros
+│	└── aprimoramento.py    # Implementação dos aprimoramentos da imagem
 ├── main.py                 # Inicialização da aplicação
-├── streamlit_app.py        # Interface gráfica
-├── image_processing.py     # Implementação dos filtros
+├── README_images/			# Pasta com os arquivos .gif do README
+├── LICENSE.md
 ├── requirements.txt
 ├── README.md
 └── .gitignore
@@ -130,6 +137,28 @@ Realiza a detecção de bordas através da segunda derivada da imagem.
 ### High Boost
 
 Realça detalhes da imagem preservando suas características originais.
+
+---
+
+## 🔧 Aprimoramentos Implementados
+
+### Negativo
+
+Transforma uma imagem em escala de cinza com 256 níveis de intensiadde
+
+### Transforamção Logarítmica
+
+Função de transformação de intesidade não-linear útil para manipulação de contraste.
+
+### Transformação Gama
+
+Função de transformação de intensidade não-linear. Assim como a logarítmica, manipula-se o contraste.
+
+---
+
+## 📊 Histograma
+
+O histograma de uma imagem apresenta a distribuição dos níveis de intensidade dos pixels da imagem.
 
 ---
 
