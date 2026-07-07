@@ -294,3 +294,74 @@ def contrast_stretch(image, max_value, min_value):
 
     # Retorna a iamgem após a aplicação do ajuste de constraste
     return image
+
+# Equalização de histograma (escala de cinza)
+def gray_histogram_equalization(image):
+    '''
+    Aplioca a equalização de histograma a uma imagem em escala de cinza.
+
+    Args:
+        image (numpy.ndarray): A imagem em escala de cinza para a qual a equalização de histograma será aplicada.
+
+    Returns:
+        image (numpy.ndarray): A imagem após a aplicação da equalização de histograma, com o contraste melhorado.
+    '''
+    # Aplica a equalização de histograma à imagem em escala de cinza usando a função equalizeHist do OpenCV.
+    # A equalização de histograma melhora o contraste da imagem, redistribuindo os valores de intensidade.
+    image = cv2.equalizeHist(image)
+
+    # Retorna a imagem após a quealização de histograma
+    return image
+
+# Equalização de histograma (colorida)
+def color_histogram_equalization(image):
+    '''
+    Aplioca a equalização de histograma a uma imagem colorida.
+
+    Args:
+        image (numpy.ndarray): A imagem colorida para a qual a equalização de histograma será aplicada.
+
+    Returns:
+        image (numpy.ndarray): A imagem após a aplicação da equalização de histograma, com o contraste melhorado.
+    '''
+    # Separa os canais de cor da imagem: R, G e B.
+    r, g, b = cv2.split(image)
+
+    # Aplica a equalização de histograma ao canal vermelho.
+    r = cv2.equalizeHist(r)
+
+    # Aplica a equalização de histograma ao canal verde.
+    g = cv2.equalizeHist(g)
+
+    # Aplica a equalização de histograma ao canal azul.
+    b = cv2.equalizeHist(b)
+
+    # Recombina os canais ajustados em uma única imagem colorida
+    image = cv2.merge([r, g, b])
+
+    # Retorna a imamgem colorida após a aplicação da equalização de histograma.
+    return image
+
+# Verifica se a imagem é colorida e aplica a função de equalização de histograma
+def histogram_equalization(image):
+    '''
+    Aplioca a equalização de histograma a uma imagem, diferenciando entre imagens coloridas e em escala de cinza.
+
+    Args:
+        image (numpy.ndarray): A imagem para a qual a equalização de histograma será aplicada. Pode ser uma imagem colorida ou em escala de cinza.
+
+    Returns:
+        image (numpy.ndarray): A imagem após a aplicação da equalização de histograma, com o contraste melhorado.
+    '''
+    # Verifica se a imagem é colorida.
+    # Se o número de dimensões da imagem é maior que 2, isso indica que a imagem tem canais de cor (colorida).
+    if len(image.shape) > 2:
+        # Chama a função color_histogram_equalization para aplicar a equalização de histograma a uma imagem colorida.
+        image = color_histogram_equalization(image)
+    else:
+        # Caso contrário, a imagem é em escala de cinza.
+        # Chama a função gray_histogram_equalization para aplicar a equalização de histograma a uma imagem em escala de cinza.
+        image = gray_histogram_equalization(image)
+
+    # Retorna a imagem após a aplicação da equalização de histograma
+    return image

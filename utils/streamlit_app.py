@@ -141,6 +141,18 @@ def run():
         image = contrast_stretch(image, max_value, min_value)
 
     # ===========================
+    # Aplicando Equalização de Histograma
+    # ===========================
+    st.sidebar.header("Equalização de Histograma")
+
+    ativar_equalizacao_histograma = st.sidebar.checkbox(
+        "Fazer a equalização do histograma da imagem"
+    )
+
+    if ativar_equalizacao_histograma:
+        image = histogram_equalization(image)
+
+    # ===========================
     # Aplicando histograma na imagem
     # ===========================
     st.sidebar.header("Histograma")
@@ -231,5 +243,7 @@ def run():
     if ativar_histograma:
         with coluna_hist:
             st.subheader("Histograma")
+
+            st.write('Gráfico 3D')
 
             st.pyplot(histogram)
