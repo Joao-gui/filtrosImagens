@@ -23,10 +23,12 @@ A aplicação permite carregar uma imagem, aplicar diferentes técnicas de proce
   - Negativo
   - Transformação Logarítmica
   - Transformação Gama
+  - Ajuste de Contraste
+- Equalização de Histograma
 - Histograma
 - Comparação entre imagem original e imagem processada
 
-![gif1](README_images/gif1.gif)
+![gif1](README_images/gif4.gif)
 
 ![gif2](README_images/gif2.gif)
 
@@ -108,6 +110,18 @@ http://localhost:8501
 
 ---
 
+## 📏 Redimensionamento
+
+Muda a escala da imagem (%)
+
+---
+
+## 🧂 Ruído
+
+Adiciona a imágem o ruído 'Sal e Pimenta'.
+
+---
+
 ## 📚 Filtros implementados
 
 ### Escala de Cinza
@@ -153,6 +167,16 @@ Função de transformação de intesidade não-linear útil para manipulação d
 ### Transformação Gama
 
 Função de transformação de intensidade não-linear. Assim como a logarítmica, manipula-se o contraste.
+
+### Ajuste de Contraste
+
+Ajuste de contraste permite espalha ou comprimir a distribuição do histograma de uma imagem, aumentando ou diminuindo o contraste da iamgem, através da transformação de intensidade linear.
+
+---
+
+## 📈 Equalização de Histograma
+
+Permite reduzir as diferenças de intensidade em uma imagem aproximando o histograma da imagem de entrada de um histograma uniforme.
 
 ---
 
