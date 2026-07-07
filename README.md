@@ -28,7 +28,7 @@ A aplicação permite carregar uma imagem, aplicar diferentes técnicas de proce
 - Histograma
 - Comparação entre imagem original e imagem processada
 
-![gif1](README_images/gif4.gif)
+![gif1](README_images/gif1.gif)
 
 ![gif2](README_images/gif2.gif)
 
