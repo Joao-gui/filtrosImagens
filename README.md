@@ -112,13 +112,13 @@ http://localhost:8501
 
 ## 📏 Redimensionamento
 
-Muda a escala da imagem (%)
+Muda a escala da imagem (%).
 
 ---
 
 ## 🧂 Ruído
 
-Adiciona a imágem o ruído 'Sal e Pimenta'.
+Adiciona a imagem o ruído 'Sal e Pimenta'.
 
 ---
 
