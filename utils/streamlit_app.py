@@ -118,7 +118,8 @@ def run():
             "Original",
             "Negativo",
             "Transformação Logarítmica",
-            "Transformação Gama"
+            "Transformação Gama",
+            "Ajuste de Contraste"
         ]
     )
 
@@ -133,6 +134,11 @@ def run():
     elif aprimoramento == "Transformação Gama":
         g = st.sidebar.slider("Gama", 0.0, 2.0, 1.0, step=0.1)
         image = gamma_correction(image, g)
+
+    elif aprimoramento == "Ajuste de Contraste":
+        min_value = st.sidebar.slider("Mín", 0, 255, 0, step=1)
+        max_value = st.sidebar.slider("Máx", 0, 255, 255, step=1)
+        image = contrast_stretch(image, max_value, min_value)
 
     # ===========================
     # Aplicando histograma na imagem
