@@ -150,7 +150,8 @@ def run():
         "Tipos de segmentação da imagem",
         [
             "Original",
-            "Limiarização (Thresholding)"
+            "Limiarização (Thresholding)",
+            "Limiarização (Método Otsu)"
         ]
     )
 
@@ -160,6 +161,9 @@ def run():
     if segmentacao == 'Limiarização (Thresholding)':
         t = st.sidebar.slider("Limiar", 0, 255, 125, step=1)
         image, mask = threshold(image, t)
+
+    elif segmentacao == 'Limiarização (Método Otsu)':
+        image, mask, t = otsu_threshold(image)
 
     # ===========================
     # Aplicando Equalização de Histograma
@@ -274,7 +278,7 @@ def run():
         with col_mask:
             st.subheader("Máscara")
 
-            st.write("Máscara da imagem")
+            st.write(f"**Valor do limiar aplicado:** {t}")
 
             st.image(mask, clamp=True)
 
