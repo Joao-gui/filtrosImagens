@@ -151,12 +151,16 @@ def run():
         [
             "Original",
             "Limiarização (Thresholding)",
-            "Limiarização (Método Otsu)"
+            "Limiarização (Método Otsu)",
+            "Segmentação por Cor (HSV)"
         ]
     )
 
     # Mascara da segmentação
     mask = None
+
+    # Valor limiar usado no Thresholding e Otsu
+    t = None
 
     if segmentacao == 'Limiarização (Thresholding)':
         t = st.sidebar.slider("Limiar", 0, 255, 125, step=1)
@@ -165,6 +169,54 @@ def run():
     elif segmentacao == 'Limiarização (Método Otsu)':
         image, mask, t = otsu_threshold(image)
 
+    elif segmentacao == 'Segmentação por Cor (HSV)':
+        st.sidebar.markdown('### 🎨 Cor de Referência')
+
+        cor = st.sidebar.color_picker("Escolha uma cor", "#ff0000")
+
+        # RGB -> HSV
+        rgb = tuple(
+            int(cor[i:i+2], 16)
+            for i in (1, 3, 5)
+        )
+
+        hsv = cv2.cvtColor(np.uint8([[rgb]]), cv2.COLOR_RGB2HSV)[0][0]
+
+        h = int(hsv[0])
+        s = int(hsv[1])
+        v = int(hsv[2])
+
+        # Intervaço automático
+        h_min = max(0, h)
+        h_max = min(179, h)
+
+        s_min = max(0, s - 60)
+        s_max = 255
+
+        v_min = max(0, v - 60)
+        v_max = 255
+
+        # Configuração avançada
+        with st.sidebar.expander("Configuração Avançada (HSV)"):
+            h_min = st.slider("H min", 0, 179, h_min)
+            h_max = st.slider("H max", 0, 179, h_max)
+
+            s_min = st.slider("S min", 0, 255, s_min)
+            s_max = st.slider("S max", 0, 255, s_max)
+
+            v_min = st.slider("V min", 0, 255, v_min)
+            v_max = st.slider("V max", 0, 255, v_max)
+
+        image, mask = color_segmentation(
+            image,
+            h_min,
+            h_max,
+            s_min,
+            s_max,
+            v_min,
+            v_max
+        )
+        
     # ===========================
     # Aplicando Equalização de Histograma
     # ===========================

@@ -7,8 +7,55 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 
-def color_segmentation(_):
-    pass
+# Segmentação por cor
+def color_segmentation(image, h_min, h_max, s_min, s_max, v_min, v_max):
+    '''
+    Aplica segmentação de uma imagem apartir de uma cor específica.
+
+    Args:
+        image (numpy.ndarray): A imagem para qual será feito aplicação de segmentação por cor.
+        h_min (int): valor mínimo de h
+        h_max (int): valor máximo de h
+        s_min (int): valor mínimo de s
+        s_max (int): valor máximo de s
+        v_min (int): valor mínimo de v
+        v_max (int): valor máximo de v
+
+    Returns:
+        result (numpy.ndarray): A imagem resultada após a segmentação.
+        mask (numpy.ndarray): A mascara de aplicação para a segmentação da imagem.
+    '''
+    # Define os limites inferiores e superiores para a segmentação de cores no espaço dee cores HSV
+    lower_bound = np.array([h_min, s_min, v_min])
+    upper_bound = np.array([h_max, s_max, v_max])
+
+    # Verifica se a imagem é colorida (tem mais de 2 dimensões)
+    # Se a imagem for em escala de cinza não faz nada
+    if (len(image.shape) > 2):
+        # Aplica um filtro de mediana para suavizar a imagem e reduzir o ruído
+        blur_image = cv2.medianBlur(image, 5)
+
+        # Converte a imagem do espaço de cores RGB para HSV
+        hsv = cv2.cvtColor(blur_image, cv2.COLOR_RGB2HSV)
+
+        # Cria uma máscara binária onde os pixels dentro do intervalo especificado são brancos (255) e o resto é preto (0)
+        mask = cv2.inRange(hsv, lower_bound, upper_bound)
+
+        # Preenchee buracos na máscara binária para garantir que as áreas segmentadas sejam contínuas
+        mask = ndimage.binary_fill_holes(mask).astype(np.uint8)
+
+        # Correção para mostrar no streamlit para sair do 0 ou 1 e mostrar 0 ou 255
+        mask *= 255
+
+        # Aplica a máscara à imagem original, mantendo apenas os pixels dentro do
+        # intervalo de cores especificado
+        # A máscara é uma imagem binária (contendo valores 0 a 255).
+        # A opreação AND será aplicada apenas onde a máscara tem valor 255 (branco),
+        # enquanto os valores 0 (preto) na máscara irão resultar em zeros na iamgme resultante.
+        result = cv2.bitwise_and(image, image, mask=mask)
+
+        # Retorna a imagm segmentada e a máscara binária
+        return result, mask
 
 # Limiarização (Thresholding)
 def threshold(image, t):
@@ -20,7 +67,7 @@ def threshold(image, t):
         t (int): Valor inteiro do limiar.
 
     Returns:
-        result (numpy.ndarray): A imagem resultando após a segmentação.
+        result (numpy.ndarray): A imagem resultada após a segmentação.
         mask (numpy.ndarray): A mascara de aplicação para a segmentação da imagem.
     '''
     # Verifica se a imagem é colorida (tem mais de 2 dimensões)
