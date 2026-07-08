@@ -4,6 +4,7 @@ import numpy as np
 
 from utils.image_processing import *
 from utils.aprimoramento import *
+from utils.segmentacao import *
 
 def run():
     st.set_page_config(
@@ -141,6 +142,26 @@ def run():
         image = contrast_stretch(image, max_value, min_value)
 
     # ===========================
+    # Sidebar Segmentação da imagem
+    # ===========================
+    st.sidebar.header("Segmentação")
+
+    segmentacao = st.sidebar.selectbox(
+        "Tipos de segmentação da imagem",
+        [
+            "Original",
+            "Limiarização (Thresholding)"
+        ]
+    )
+
+    # Mascara da segmentação
+    mask = None
+
+    if segmentacao == 'Limiarização (Thresholding)':
+        t = st.sidebar.slider("Limiar", 0, 255, 125, step=1)
+        image, mask = threshold(image, t)
+
+    # ===========================
     # Aplicando Equalização de Histograma
     # ===========================
     st.sidebar.header("Equalização de Histograma")
@@ -170,7 +191,7 @@ def run():
     # Informações da imagem
     # ===========================
 
-    st.write(f"**Dimensões da imagem:** {imagem_original.shape[1]} x {imagem_original.shape[0]} pixels")
+    st.write(f"**Dimensões da imagem importada:** {imagem_original.shape[1]} x {imagem_original.shape[0]} pixels")
 
     # ===========================
     # Exibição das imagens
@@ -179,22 +200,42 @@ def run():
     # ===========================
     # Layout
     # ===========================
-    if ativar_histograma:
-        if usar_ruido:
-            col1, col2, col3, col4 = st.columns(4)
-        else:
-            col1, col2, col3 = st.columns(3)
+    num_colunas = 2     # Original + Resultado
 
-    else:
-        if usar_ruido:
-            col1, col2, col3 = st.columns(3)
-        else:
-            col1, col2 = st.columns(2)
+    if usar_ruido:
+        num_colunas += 1
+
+    if mask is not None:
+        num_colunas += 1
+
+    if ativar_histograma:
+        num_colunas += 1
+
+    colunas = st.columns(num_colunas)
+
+    indice = 0
+
+    col_original = colunas[indice]
+    indice += 1
+
+    if usar_ruido:
+        col_ruido = colunas[indice]
+        indice += 1
+
+    col_resultado = colunas[indice]
+    indice += 1
+
+    if mask is not None:
+        col_mask = colunas[indice]
+        indice += 1
+
+    if ativar_histograma:
+        col_hist = colunas[indice]
 
     # ===========================
     # Imagem Original
     # ===========================
-    with col1:
+    with col_original:
 
         st.subheader('Imagem Original')
 
@@ -206,28 +247,17 @@ def run():
     # Imagem com Ruído
     # ===========================
     if usar_ruido:
-        with col2:
+        with col_ruido:
             st.subheader('Imagem com Ruído')
 
             st.write(f'{imagem_ruido.shape[1]} x {imagem_ruido.shape[0]}')
 
             st.image(imagem_ruido)
 
-        coluna_resultado = col3
-
-        if ativar_histograma:
-            coluna_hist = col4
-
-    else:
-        coluna_resultado = col2
-
-        if ativar_histograma:
-            coluna_hist = col3
-
     # ===========================
     # Resultado
     # ===========================
-    with coluna_resultado:
+    with col_resultado:
         st.subheader("Resultado Final")
 
         st.write(f'{image.shape[1]} x {image.shape[0]}')
@@ -238,10 +268,21 @@ def run():
             st.image(image)
 
     # ===========================
+    # Máscara
+    # ===========================
+    if mask is not None:
+        with col_mask:
+            st.subheader("Máscara")
+
+            st.write("Máscara da imagem")
+
+            st.image(mask, clamp=True)
+
+    # ===========================
     # Histograma
     # ===========================
     if ativar_histograma:
-        with coluna_hist:
+        with col_hist:
             st.subheader("Histograma")
 
             st.write('Gráfico 3D')
