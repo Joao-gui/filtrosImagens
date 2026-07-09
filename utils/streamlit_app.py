@@ -4,6 +4,7 @@ import numpy as np
 
 from utils.image_processing import *
 from utils.aprimoramento import *
+from utils.segmentacao import *
 
 def run():
     st.set_page_config(
@@ -141,6 +142,91 @@ def run():
         image = contrast_stretch(image, max_value, min_value)
 
     # ===========================
+    # Sidebar Segmentação da imagem
+    # ===========================
+    st.sidebar.header("Segmentação")
+
+    segmentacao = st.sidebar.selectbox(
+        "Tipos de segmentação da imagem",
+        [
+            "Original",
+            "Limiarização (Thresholding)",
+            "Limiarização (Método Otsu)",
+            "Segmentação por Cor (HSV)",
+            "Detecção de bordas (Canny)",
+            "Watershed"
+        ]
+    )
+
+    # Mascara da segmentação
+    mask = None
+
+    # Valor limiar usado no Thresholding e Otsu
+    t = None
+
+    if segmentacao == 'Limiarização (Thresholding)':
+        t = st.sidebar.slider("Limiar", 0, 255, 125, step=1)
+        image, mask = threshold(image, t)
+
+    elif segmentacao == 'Limiarização (Método Otsu)':
+        image, mask, t = otsu_threshold(image)
+
+    elif segmentacao == 'Segmentação por Cor (HSV)':
+        st.sidebar.markdown('### 🎨 Cor de Referência')
+
+        cor = st.sidebar.color_picker("Escolha uma cor", "#ff0000")
+
+        # RGB -> HSV
+        rgb = tuple(
+            int(cor[i:i+2], 16)
+            for i in (1, 3, 5)
+        )
+
+        hsv = cv2.cvtColor(np.uint8([[rgb]]), cv2.COLOR_RGB2HSV)[0][0]
+
+        h = int(hsv[0])
+        s = int(hsv[1])
+        v = int(hsv[2])
+
+        # Intervaço automático
+        h_min = max(0, h)
+        h_max = min(179, h)
+
+        s_min = max(0, s - 60)
+        s_max = 255
+
+        v_min = max(0, v - 60)
+        v_max = 255
+
+        # Configuração avançada
+        with st.sidebar.expander("Configuração Avançada (HSV)"):
+            h_min = st.slider("H min", 0, 179, h_min)
+            h_max = st.slider("H max", 0, 179, h_max)
+
+            s_min = st.slider("S min", 0, 255, s_min)
+            s_max = st.slider("S max", 0, 255, s_max)
+
+            v_min = st.slider("V min", 0, 255, v_min)
+            v_max = st.slider("V max", 0, 255, v_max)
+
+        image, mask = color_segmentation(
+            image,
+            h_min,
+            h_max,
+            s_min,
+            s_max,
+            v_min,
+            v_max
+        )
+
+    elif segmentacao == 'Detecção de bordas (Canny)':
+        lower_thresh_rate = st.sidebar.slider("Proporção do Limiar inferior", 0.0, 1.0, 0.5, step=0.1)
+        image, mask, num_counters = canny(image, lower_thresh_rate)
+
+    elif segmentacao == 'Watershed':
+        image, mask = watershed_segmentation(image)
+        
+    # ===========================
     # Aplicando Equalização de Histograma
     # ===========================
     st.sidebar.header("Equalização de Histograma")
@@ -170,7 +256,7 @@ def run():
     # Informações da imagem
     # ===========================
 
-    st.write(f"**Dimensões da imagem:** {imagem_original.shape[1]} x {imagem_original.shape[0]} pixels")
+    st.write(f"**Dimensões da imagem importada:** {imagem_original.shape[1]} x {imagem_original.shape[0]} pixels")
 
     # ===========================
     # Exibição das imagens
@@ -179,22 +265,42 @@ def run():
     # ===========================
     # Layout
     # ===========================
-    if ativar_histograma:
-        if usar_ruido:
-            col1, col2, col3, col4 = st.columns(4)
-        else:
-            col1, col2, col3 = st.columns(3)
+    num_colunas = 2     # Original + Resultado
 
-    else:
-        if usar_ruido:
-            col1, col2, col3 = st.columns(3)
-        else:
-            col1, col2 = st.columns(2)
+    if usar_ruido:
+        num_colunas += 1
+
+    if mask is not None:
+        num_colunas += 1
+
+    if ativar_histograma:
+        num_colunas += 1
+
+    colunas = st.columns(num_colunas)
+
+    indice = 0
+
+    col_original = colunas[indice]
+    indice += 1
+
+    if usar_ruido:
+        col_ruido = colunas[indice]
+        indice += 1
+
+    col_resultado = colunas[indice]
+    indice += 1
+
+    if mask is not None:
+        col_mask = colunas[indice]
+        indice += 1
+
+    if ativar_histograma:
+        col_hist = colunas[indice]
 
     # ===========================
     # Imagem Original
     # ===========================
-    with col1:
+    with col_original:
 
         st.subheader('Imagem Original')
 
@@ -206,28 +312,17 @@ def run():
     # Imagem com Ruído
     # ===========================
     if usar_ruido:
-        with col2:
+        with col_ruido:
             st.subheader('Imagem com Ruído')
 
             st.write(f'{imagem_ruido.shape[1]} x {imagem_ruido.shape[0]}')
 
             st.image(imagem_ruido)
 
-        coluna_resultado = col3
-
-        if ativar_histograma:
-            coluna_hist = col4
-
-    else:
-        coluna_resultado = col2
-
-        if ativar_histograma:
-            coluna_hist = col3
-
     # ===========================
     # Resultado
     # ===========================
-    with coluna_resultado:
+    with col_resultado:
         st.subheader("Resultado Final")
 
         st.write(f'{image.shape[1]} x {image.shape[0]}')
@@ -238,10 +333,30 @@ def run():
             st.image(image)
 
     # ===========================
+    # Máscara
+    # ===========================
+    if mask is not None:
+        if segmentacao == 'Detecção de bordas (Canny)':
+            with col_mask:
+                st.subheader("Máscara")
+
+                st.write(f'**Número de regiões =** {num_counters}')
+
+                st.image(mask, clamp=True)
+
+        else:
+            with col_mask:
+                st.subheader("Máscara")
+
+                st.write(f"**Valor do limiar aplicado:** {t}")
+
+                st.image(mask, clamp=True)
+
+    # ===========================
     # Histograma
     # ===========================
     if ativar_histograma:
-        with coluna_hist:
+        with col_hist:
             st.subheader("Histograma")
 
             st.write('Gráfico 3D')
