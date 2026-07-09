@@ -10,9 +10,10 @@ A aplicação permite carregar uma imagem, aplicar diferentes técnicas de proce
 
 - Upload de imagens (.jpg, .jpeg e .png)
 - Redimensionamento da imagem
-- Conversão para escala de cinza
 - Adição de ruído "Sal e Pimenta"
 - Aplicação dos seguintes filtros:
+
+  - Conversão para escala de cinza
   - Filtro da Média
   - Filtro Gaussiano
   - Filtro da Mediana
@@ -20,10 +21,18 @@ A aplicação permite carregar uma imagem, aplicar diferentes técnicas de proce
   - Filtro Laplaciano
   - Filtro High Boost
 - Aplicação de Aprimoramento
+
   - Negativo
   - Transformação Logarítmica
   - Transformação Gama
   - Ajuste de Contraste
+- Segmentação
+
+  - Limiarização (Thresholding)
+  - Limiarização (Método Otsu)
+  - Segmentação por Cor (HSV)
+  - Detecção de bordas (Canny)
+  - Watershed
 - Equalização de Histograma
 - Histograma
 - Comparação entre imagem original e imagem processada
@@ -33,6 +42,8 @@ A aplicação permite carregar uma imagem, aplicar diferentes técnicas de proce
 ![gif2](README_images/gif2.gif)
 
 ![gif3](README_images/gif3.gif)
+
+![gif4](README_images/gif4.gif)
 
 ---
 
@@ -55,6 +66,7 @@ filtrosImagens/
 │	└── streamlit_app.py    # Interface gráfica
 │	└── image_processing.py # Implementação dos filtros
 │	└── aprimoramento.py    # Implementação dos aprimoramentos da imagem
+│	└── segmeentacao.py		# Implementação de segmentação da imagem
 ├── main.py                 # Inicialização da aplicação
 ├── README_images/			# Pasta com os arquivos .gif do README
 ├── LICENSE.md
@@ -171,6 +183,34 @@ Função de transformação de intensidade não-linear. Assim como a logarítmic
 ### Ajuste de Contraste
 
 Ajuste de contraste permite espalha ou comprimir a distribuição do histograma de uma imagem, aumentando ou diminuindo o contraste da iamgem, através da transformação de intensidade linear.
+
+---
+
+## 🎨 Segmentação
+
+### Limiarização (Thresholding)
+
+A limiarização divide a imagem em regiões de acordo com o valor de intensidade de cada pixel em comparação com um limiar.
+
+O valor do limiar pode ser obtido empiricamente através de várias tentativas com diferentes valores para o limiar até a obtenção de um resultado satisfatório.
+
+O valor do limiar também pode ser obtido através da análise do histograma. Se o histograma da imagem apresenta dois picos, pode-se escolher como valor de limiar um nível de cinza que se encontra no vale entre esses dois picos do histograma.
+
+### Limizarização (Método Otsu)
+
+Este método calcula automaticamente o valor do limiar a partir do histograma da imagem de entrada.
+
+### Segmentação por Cor (HSV)
+
+Aplica a segmentação a partir de uma cor específica.
+
+### Detecção de bordas (Canny)
+
+É um dos principais métodos de detecção de bordas por permitir a detecção de bordas em toda a imagem, incluindo regiões de baixo contraste. É um dos principais métodos de detecção de bordas por permitir a detecção de bordas em toda a imagem, incluindo regiões de baixo contraste.
+
+### Watershed
+
+É um algoritmo de segmentação de imagem em que os objetos de interesse são bem distintos uns dos outros, mas esses objetos estão conectados entre si.
 
 ---
 
