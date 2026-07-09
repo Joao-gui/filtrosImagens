@@ -147,3 +147,62 @@ def otsu_threshold(image):
 
     # Retorna a iamgem segmentada, a máscara binária e o valor de limiar determinado por Otsu.
     return result, mask, t
+
+# Detecção de Bordas - Método de Canny
+def canny(image, lower_thresh_rate):
+    '''
+    É um dos principais métodos de detecção de bordas por permitir a detecção de bordas em toda a imagem,
+    incluindo regiões de baixo contraste.
+
+    Args:
+        image (numpy.ndarray): A imagem para qual será feito aplicação de Canny.
+        lower_thresh_rate (float): Proporção do limiar inferior
+
+    Returns:
+        result (numpy.ndarray): A imagem resultando após a segmentação.
+        edges (numpy.ndarray): Bordas da imagem
+        num_coutours (int): Número de contornos encontrados
+    '''
+    # Verifica se a imagem é colorida (tem mais de 2 dimensões)
+    if(len(image.shape) > 2):
+        # Converte a imagem de RGB para escala de cinza
+        gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    else:
+        # Se a imagem já estiver em escala de cinza, a usa diretamente
+        gray_image = image
+
+    # Aplica um filtro de mediana para suavizar a imagem e reduzir o ruído
+    gray_image = cv2.medianBlur(gray_image, 3)
+
+    # Aplica o limiar de Otsu na imagem suavizada com limiar binário inverso
+    # O limiar de Otsu determina automaticamente o valor de limiar 't'
+    # Pixels acima do limiar 't' são definidos como 0 (preto)
+    # Pixels abaixo do limiar 't' são definidos como 255 (branco)
+    t, thresh = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+
+    # Calcula o limiar inferior como uma proporção do limiar superior determinado por Otsu
+    lower = int(t * lower_thresh_rate)
+    upper = t
+
+    # Aplica o detector de bordas Canny usando os limiares inferiore e superior
+    edges = cv2.Canny(gray_image, lower, upper)
+
+    # Encontra os contornos nas bordas detectadas
+    # cv2.findContours retorna uma lista de contornos encontrados e a
+    # hierarquia dos contornos.
+    # O modo cv2.RETR_EXTERNAL recupera apenas os contornos externos
+    # O método cv2.CHAIN_APPROX_SIMPLE comprime segmentos horizontais, verticais e diagonais
+    # e deixa apenas seus pontos finais.
+    # h = hierarquia dos contornos
+    (contours, h) = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Desenha os contornos encontrados na imagem original, colorindo-os de verde e
+    # com espessura de 3 pixels
+    # -1: Indica que todos os contornos da lista contours devem ser desenhados.
+    result = cv2.drawContours(image.copy(), contours, -1, color=(0, 255, 0), thickness=3)
+
+    # Conta o número de contornos encontrados
+    num_contours = len(contours)
+
+    # Retorna a imagem com os contornos desenhados, a imagem de bordas e o número dee contornos
+    return result, edges, num_contours

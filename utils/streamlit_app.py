@@ -152,7 +152,8 @@ def run():
             "Original",
             "Limiarização (Thresholding)",
             "Limiarização (Método Otsu)",
-            "Segmentação por Cor (HSV)"
+            "Segmentação por Cor (HSV)",
+            "Detecção de bordas (Canny)"
         ]
     )
 
@@ -216,6 +217,10 @@ def run():
             v_min,
             v_max
         )
+
+    elif segmentacao == 'Detecção de bordas (Canny)':
+        lower_thresh_rate = st.sidebar.slider("Proporção do Limiar inferior", 0.0, 1.0, 0.5, step=0.1)
+        image, mask, num_counters = canny(image, lower_thresh_rate)
         
     # ===========================
     # Aplicando Equalização de Histograma
@@ -327,12 +332,21 @@ def run():
     # Máscara
     # ===========================
     if mask is not None:
-        with col_mask:
-            st.subheader("Máscara")
+        if segmentacao == 'Detecção de bordas (Canny)':
+            with col_mask:
+                st.subheader("Máscara")
 
-            st.write(f"**Valor do limiar aplicado:** {t}")
+                st.write(f'**Número de regiões =** {num_counters}')
 
-            st.image(mask, clamp=True)
+                st.image(mask, clamp=True)
+
+        else:
+            with col_mask:
+                st.subheader("Máscara")
+
+                st.write(f"**Valor do limiar aplicado:** {t}")
+
+                st.image(mask, clamp=True)
 
     # ===========================
     # Histograma
