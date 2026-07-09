@@ -153,7 +153,8 @@ def run():
             "Limiarização (Thresholding)",
             "Limiarização (Método Otsu)",
             "Segmentação por Cor (HSV)",
-            "Detecção de bordas (Canny)"
+            "Detecção de bordas (Canny)",
+            "Watershed"
         ]
     )
 
@@ -221,6 +222,9 @@ def run():
     elif segmentacao == 'Detecção de bordas (Canny)':
         lower_thresh_rate = st.sidebar.slider("Proporção do Limiar inferior", 0.0, 1.0, 0.5, step=0.1)
         image, mask, num_counters = canny(image, lower_thresh_rate)
+
+    elif segmentacao == 'Watershed':
+        image, mask = watershed_segmentation(image)
         
     # ===========================
     # Aplicando Equalização de Histograma

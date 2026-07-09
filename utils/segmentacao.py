@@ -206,3 +206,91 @@ def canny(image, lower_thresh_rate):
 
     # Retorna a imagem com os contornos desenhados, a imagem de bordas e o número dee contornos
     return result, edges, num_contours
+
+# Algoritmo de segmentação de imagem de objetos conectados entre si
+def watershed_segmentation(image):
+    '''
+    Algoritmo de segmentação de imagem em que os objetos de interesse são bem distintos uns dos outros,
+    mas esses objjetos estão conectados entre si.
+
+    Args:
+        image (numpy.ndarray): A imagem para qual será feito aplicação da segmentação Watershed.
+
+    Returns:
+        blended_image: Imagem sobreposta.
+        label_image: imagem colorida com os rótulos
+    '''
+
+    # Verifica se a imagem é colorida (tem mais de 2 dimensões)
+    if(np.ndim(image) > 2):
+        # Converte a imagem colorida (RGB) para escala de cinza
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    else:
+        # Se a imagem já estiver em escala de cinza, a usa diretamente
+        gray = image
+
+    # Aplica um filtro de mediana com um tamanho de kernel de 3 para suavizar a imagem e reduzir o ruído
+    gray = cv2.medianBlur(gray, 3)
+
+    # Aplica o limiar de Otsu na imagem suavizada com limiar binário inverso
+    # O limiar de Otsu determina automaticamente o valor de limiar 't'
+    # Pixels acima do limiar 't' são definidos como 0 (preto)
+    # Pixeels abaixo do limiar 't' são definidos como 255 (branco)
+    t, otsu_mask = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+
+    # Preenche buracos na máscara binária para garantir que as áreas segmentadas sejam contínuas
+    otsu_mask = ndimage.binary_fill_holes(otsu_mask).astype(np.uint8)
+
+    # A transformada de distância substitui os valore de 255 na máscara binária
+    # por distâncias e mantém os valores de 0 como estão.
+    # Assim, a imagem de distância resultante reflete a distância euclidiana
+    # dos pixels em regiões de interesse ao fundo mais próximo.
+    distance = ndimage.distance_transform_edt(otsu_mask)
+
+    # Peak_local_max identifica as coordenadas de picos locais, que são
+    # pixels específicos na imagem distance onde a distância é máxima
+    # em comparação com seus vizinhos locais definida pela máscara footprint=np.onde((3,3))
+    # Esses pixels podem ser considerados como locais de maior profundidade
+    # ou vales ou bacia hidrográfica
+    # labels=otsu_mask garante que apenas os locais localizados dentro da
+    # região de interesse (onde otsu_mask é 255) são considerados.
+    coords = peak_local_max(distance, footprint=np.ones((3,3)), labels=otsu_mask)
+
+    # Cria uma máscara booleana do mesmo tamanho da imagem de distância
+    # inicializada como 'False'
+    mask = np.zeros(distance.shape, dtype=bool)
+    # Marca os pontos de maior profundidade (ou picos locais) como 'True' na máscara.
+    mask[tuple(coords.T)] = True
+
+    # Rotula os marcadores com números inteiros para uso no algoritmo de segmentação
+    markers, _ = ndimage.label(mask)
+
+    # Aplica o algoritmo de segmentação Watershed para encontrar regiões distintas
+    # na imagem. o Algoritmo Watershed é um método de segmentação que trata a
+    # imagem como uma topográfia com 'vales' e 'picos'.
+    # Ao usar o sinal negativo em distance, os pontos com as maiores distâncias
+    # serão transformados em pontos com menor valor numérico, que associados aos
+    # marcadores, obtidos anteriormente, definem os pontos iniciais de inundação.
+    # A máscara 'otsu_mask' é usada para restringir a segmentação apenas às áreas
+    # relevantes. O resultado 'labels', é uma imagem rotulada onde cada região
+    # segmentada recebe um valor único.
+    labels = watershed(-distance, markers, mask=otsu_mask)
+
+    # Os valores de labels são mapeados para intervalo [0,1] e depois
+    # mapeado para uma imagem colorida usando o colormap 'nipy_spectral'
+    label_image = plt.cm.nipy_spectral(labels / np.max(labels))
+
+    # Converte a imagem colorida resultante para o intervalo [0, 255] e tipo uint8
+    label_image = (label_image[:, :, :3] * 255).astype(np.uint8)
+
+    # Define o fundo da imagem label como branco (255) para todos os pixels == 0
+    label_image[label_image==0] = 255
+
+    # Define a transparência para a sobreposição da imagem rotulada na imagem original
+    alpha = 0.3
+
+    # Sobrepõe a imagem rotulada na imagem original com a transparência especificada
+    blended_image = cv2.addWeighted(image, 1 - alpha, label_image, alpha, 0)
+
+    # Retorna a imagem sobreposta e a imagem colorida com os rótulos
+    return blended_image, label_image
